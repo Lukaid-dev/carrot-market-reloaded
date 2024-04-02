@@ -1,12 +1,8 @@
-// type vs interface
-// For the most part, you can choose based on personal preference, and TypeScript will tell you if it needs something to be the other kind of declaration. If you would like a heuristic, use interface until you need to use features from type.
-// https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#differences-between-type-aliases-and-interfaces
-
 interface FormInputProps {
   type: string;
   placeholder: string;
   required: boolean;
-  errors: string[];
+  errors?: string[];
   name: string;
 }
 
@@ -26,11 +22,12 @@ export default function FormInput({
         required={required}
         name={name}
       />
-      {errors.map((error, index) => (
-        <span key={index} className="font-medium text-red-500 ">
-          {error}
-        </span>
-      ))}
+      {errors &&
+        errors?.map((error, index) => (
+          <span key={index} className="font-medium text-red-500 ">
+            {error}
+          </span>
+        ))}
     </div>
   );
 }

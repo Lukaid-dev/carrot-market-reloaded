@@ -21,14 +21,12 @@ export default function Login() {
           type="email"
           placeholder="Email"
           required={true}
-          errors={[]}
         />
         <FormInput
           name="password"
           type="password"
           placeholder="Password"
           required={true}
-          errors={state?.errors ?? []}
         />
         <FormBtn text="Login" />
       </form>
