@@ -8,9 +8,9 @@ import {
 import db from '@/lib/db';
 import { z } from 'zod';
 import bycryt from 'bcrypt';
-import { getIronSession } from 'iron-session';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import getSession from '@/lib/session';
 
 const checkUsername = (username: string) => {
   return !username.includes('admin');
@@ -25,7 +25,7 @@ const checkUniqueUsername = async (username: string) => {
       id: true,
     },
   });
-  return !user;
+  return !!user;
 };
 
 const checkUniqueEmail = async (email: string) => {
@@ -37,7 +37,7 @@ const checkUniqueEmail = async (email: string) => {
       id: true,
     },
   });
-  return !user;
+  return !!user;
 };
 
 const checkPassword = ({
@@ -61,18 +61,37 @@ const formSchema = z
       .trim()
       .refine(checkUsername, {
         message: 'Username cannot contain "admin"',
-      })
-      .refine(checkUniqueUsername, {
-        message: 'Username is already taken',
       }),
-    email: z.string().email().refine(checkUniqueEmail, {
-      message: 'Email is already taken',
-    }),
+    email: z.string().email(),
     password: z
       .string()
       .min(PASSWORD_MIN_LENGTH)
       .regex(PASSWORD_REGEX, PASSWORD_REGEX_ERROR),
     confirm_password: z.string().min(PASSWORD_MIN_LENGTH),
+  })
+  .superRefine(async (data, ctx) => {
+    const user = await checkUniqueUsername(data.username);
+    if (user) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Username is already taken',
+        path: ['username'],
+        fatal: true,
+      });
+      return z.NEVER;
+    }
+  })
+  .superRefine(async (data, ctx) => {
+    const email = await checkUniqueEmail(data.email);
+    if (email) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Email is already taken',
+        path: ['email'],
+        fatal: true,
+      });
+      return z.NEVER;
+    }
   })
   .refine(checkPassword, {
     message: 'Passwords do not match',
@@ -107,14 +126,10 @@ export async function createAccount(prevState: any, formData: FormData) {
       },
     });
 
-    const cookie = await getIronSession(cookies(), {
-      cookieName: 'carrot-cookie',
-      password: process.env.COOKIE_PASSWORD!,
-    });
-    //@ts-ignore
-    cookie.id = user.id;
+    const session = await getSession();
+    session.id = user.id;
 
-    await cookie.save();
+    await session.save();
 
     redirect('/profile');
   }
