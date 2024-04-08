@@ -5,6 +5,7 @@ import {
   PASSWORD_REGEX,
   PASSWORD_REGEX_ERROR,
 } from '@/lib/constants';
+import db from '@/lib/db';
 import { z } from 'zod';
 
 const checkUsername = (username: string) => {
@@ -56,10 +57,18 @@ export async function createAccount(prevState: any, formData: FormData) {
   const result = formSchema.safeParse(data);
 
   if (!result.success) {
-    console.log(result.error.flatten());
     return result.error.flatten();
   } else {
-    console.log('Account created : ', result.data);
+    const user = await db.user.findUnique({
+      where: {
+        username: result.data.username,
+      },
+    });
+    // check if username is already taken
+    // check if email is already taken
+    // hash password
+    // save the user to the database
+    // redirect to "/home"
     return null;
   }
 }
