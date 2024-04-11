@@ -18,15 +18,11 @@ export default async function middleware(req: NextRequest) {
   const exists = publicOnlyUrls[req.nextUrl.pathname];
   if (!session.id) {
     if (exists) {
-      return NextResponse.next();
-    } else {
       return NextResponse.redirect(new URL('/', req.nextUrl.origin));
     }
   } else {
     if (exists) {
-      return NextResponse.redirect(new URL('/products', req.nextUrl.origin));
-    } else {
-      return NextResponse.next();
+      return NextResponse.redirect(new URL('/profile', req.nextUrl.origin));
     }
   }
 }
