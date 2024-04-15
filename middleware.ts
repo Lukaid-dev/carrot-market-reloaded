@@ -17,12 +17,12 @@ export default async function middleware(req: NextRequest) {
   const session = await getSession();
   const exists = publicOnlyUrls[req.nextUrl.pathname];
   if (!session.id) {
-    if (exists) {
+    if (!exists) {
       return NextResponse.redirect(new URL('/', req.nextUrl.origin));
     }
   } else {
     if (exists) {
-      return NextResponse.redirect(new URL('/product', req.nextUrl.origin));
+      return NextResponse.redirect(new URL('/products', req.nextUrl.origin));
     }
   }
 }
