@@ -22,7 +22,7 @@ export default async function middleware(req: NextRequest) {
     }
   } else {
     if (exists) {
-      return NextResponse.redirect(new URL('/profile', req.nextUrl.origin));
+      return NextResponse.redirect(new URL('/product', req.nextUrl.origin));
     }
   }
 }
